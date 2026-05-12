@@ -1,1 +1,500 @@
+---
+title: "Danish Kings"
+author: "Astrid Bang, Katrine Deleuran Holm Hatrtvigsen, Simone Rahbek Storbank"
+date: "2026-03-13"
+output: html_document
+---
 
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+```
+
+
+The task here is to load your Danish Monarchs csv into R using the `tidyverse` toolkit, calculate and explore the kings' duration of reign with pipes `%>%` in `dplyr` and plot it over time.
+
+## Load the kings
+
+Make sure to first create an  `.Rproj` workspace with a `data/` folder where you place either your own dataset or the provided `kings.csv` dataset. 
+
+1. Look at the dataset that are you loading and check what its columns are separated by? (hint: open it in plain text editor to see)
+
+List what is the
+
+separator: Comma
+
+2. Create a `kings` object in R with the different functions below and inspect the different outputs.
+-  `read.csv()`
+-  `read_csv()`
+-  `read.csv2()` 
+-  `read_csv2()`
+```{r eval=TRUE}
+# FILL IN THE CODE BELOW and review the outputs
+#library(tidyverse)
+kings1 <- read.csv("data/kings.csv")
+
+kings2 <- read_csv("data/kings.csv")
+
+kings3 <- read.csv2("data/kings.csv")
+
+kings4 <- read_csv2("data/kings.csv")
+```
+Answer: 
+1. Which of these functions is a `tidyverse` function? Read data with it below into a `kings` object
+  Using read_csv(kings2) is the right function and gives the best sheet.
+  
+2. What is the result of running `class()` on the `kings` object created with a tidyverse function.
+  It gives us a tibble:"spec_tbl_df" "tbl_df" "data.frame"
+  
+3. How many columns does the object have when created with these different functions?
+  When using read.csv we get 11 columns, while read.csv gives us 11 columns, read.csv2 and read_csv2 only gives   us 1 column.
+
+4. Show the dataset so that we can see how R interprets each column
+  By using the function head(kings) it asserts a table in our script.
+
+```{r eval = TRUE}
+# COMPLETE THE BLANKS BELOW WITH YOUR CODE, then turn the 'eval' flag in this chunk to TRUE.
+
+kings <- read_csv("data/kings.csv", na=c("NULL",""))
+
+class(kings)
+
+
+glimpse(kings)
+
+
+head(kings)
+
+```
+## Calculate the duration of reign for all the kings in your table
+You can calculate the duration of reign in years with `mutate` function by subtracting the equivalents of your `startReign` from `endReign` columns and writing the result to a new column called `duration`. But first you need to check a few things:
+
+* Is your data messy? Fix it before re-importing to R
+* Do your start and end of reign columns contain NAs? Choose the right strategy to deal with them: `na.omit()`, `na.rm=TRUE`, `!is.na()`
+
+
+Create a new column called  `duration` in the kings dataset, utilizing the `mutate()` function from tidyverse. Check with your group to brainstorm the options.
+
+```{r eval = TRUE}
+# YOUR CODE
+king_new<-kings %>% 
+  filter(!is.na(Start_year),!is.na(End_year)) %>% 
+  mutate(kings_duration=End_year-Start_year)
+
+glimpse(king_new)
+```
+
+## Calculate the average duration of reign for all rulers
+Do you remember how to calculate an average on a vector object? If not, review the last two lessons and remember that a column is basically a vector. So you need to subset your `kings` dataset to the `duration` column. If you subset it as a vector you can calculate average on it with `mean()` base-R function. If you subset it as a tibble, you can calculate average on it with `summarize()` tidyverse function. Try both ways!
+
+* You first need to know how to select the relevant `duration` column. What are your options?
+* Is your selected `duration` column a tibble or a vector? The `mean()` function can only be run on a vector. The `summarize()` function works on a tibble.
+* Are you getting an error that there are characters in your column? Coerce your data to numbers with `as.numeric()`.
+* Remember to handle NAs: `mean(X, na.rm=TRUE)`
+
+
+```{r eval=TRUE}
+# YOUR CODE
+mean(king_new$kings_duration, na.rm = TRUE)
+king_new %>% 
+  summarise(mean_kings_duration=mean(kings_duration))
+```
+
+## How many and which kings enjoyed a longer-than-average duration of reign?
+
+You have calculated the average duration above. Use it now to `filter()` the `duration` column in  `kings` dataset. Display the result and also  count the resulting rows with `count()`
+
+```{r eval=TRUE}
+# YOUR CODE
+king_new %>%
+  filter(kings_duration>mean(king_new$kings_duration)) %>% 
+  count(kings_duration>mean(king_new$kings_duration))
+ 
+```
+
+
+## How many days did the three longest-ruling monarchs rule? 
+
+* Sort kings by reign `duration` in the descending order. Select the three longest-ruling monarchs with the `slice()` function
+* Use `mutate()` to create `Days` column where you calculate the total number of days they ruled
+* BONUS: consider the transition year (with 366 days) in your calculation!
+
+```{r eval=TRUE}
+# YOUR CODE
+longest <- king_new %>% 
+  filter(kings_duration>mean(kings_duration)) %>% 
+  arrange(desc(kings_duration)) %>% 
+  slice(1:3)
+
+longest %>% 
+  mutate(Days=kings_duration*365)
+  
+```
+
+
+## Challenge: Plot the kings' duration of reign through time
+
+What is the long-term trend in the duration of reign among Danish monarchs? How does it relate to the historical violence trends ? 
+
+* Try to plot the duration of reign column in `ggplot` with `geom_point()` and  `geom_smooth()`
+* In order to peg the duration (which is between 1-99) somewhere to the x axis with individual centuries, I recommend creating a new column `midyear` by adding to `startYear` the product of `endYear` minus the `startYear` divided by two (`startYear + (endYear-startYear)/2`).
+* Now you can plot the kings dataset, plotting `midyear` along the x axis and `duration` along y axis
+* BONUS: add a title, nice axis labels to the plot and make the theme B&W and font bigger to make it nice and legible!
+
+```{r}
+# YOUR CODE
+```
+
+And to submit this rmarkdown, knit it into html. But first, clean up the code chunks, adjust the date, rename the author and change the `eval=FALSE` flag to `eval=TRUE` so your script actually generates an output.
+Well done!
+
+_________________________________________________________________________________________________________________________________________________________________________________
+
+---
+title: 'Text mining, sentiment analysis, and visualization'
+auhtors: "Simone Rahbek Storbank, Katrine Deleuran Holm Hartvigsen, Astrid Bang Nielsen"
+date: 'created on 22 November 2020 and updated `r format(Sys.time(), "%d %B, %Y")`'
+output: html_document
+---
+
+```{r setup, include=TRUE}
+knitr::opts_chunk$set(echo = TRUE,
+                      warning = FALSE,
+                      message = FALSE)
+
+library(tidyverse)
+library(here)
+
+# For text mining:
+
+library(pdftools)
+library(tidytext)
+library(textdata) 
+library(ggwordcloud)
+```
+
+**Note:** for more text analysis, you can fork & work through Casey O’Hara and Jessica Couture’s eco-data-sci workshop (available here https://github.com/oharac/text_workshop)
+
+### Get the IPCC report:
+```{r get-document}
+got_path <- here("data","got.pdf")
+got_text <- pdf_text(got_path)
+```
+
+Some things to notice:
+
+- How cool to extract text out of a PDF! Do you think it will work with any PDF?
+- Each row is a page of the PDF (i.e., this is a vector of strings, one for each page)
+- The pdf_text() function only sees text that is "selectable"
+
+Example: Just want to get text from a single page (e.g. Page 9)? 
+```{r single-page}
+got_page9 <- got_text[9]
+got_page9
+```
+
+See how that compares to the text in the PDF on Page 9. What has pdftools added and where?
+
+From Jessica and Casey's text mining workshop: “pdf_text() returns a vector of strings, one for each page of the pdf. So we can mess with it in tidyverse style, let’s turn it into a dataframe, and keep track of the pages. Then we can use stringr::str_split() to break the pages up into individual lines. Each line of the pdf is concluded with a backslash-n, so split on this. We will also add a line number in addition to the page number."
+
+### Some wrangling:
+
+- Split up pages into separate lines (separated by `\n`) using `stringr::str_split()`
+- Unnest into regular columns using `tidyr::unnest()`
+- Remove leading/trailing white space with `stringr::str_trim()`
+
+```{r split-lines}
+got_dateframe <- data.frame(got_text) %>% 
+  mutate(text_full = str_split(got_text, pattern = '\n')) %>%
+  unnest(text_full) %>% 
+  mutate(text_full = str_trim(text_full))
+
+class(got_dateframe)
+# More information: https://cran.r-project.org/web/packages/stringr/vignettes/regular-expressions.html
+```
+
+Now each line, on each page, is its own row, with extra starting & trailing spaces removed. 
+
+### Get the tokens (individual words) in tidy format
+
+Use `tidytext::unnest_tokens()` (which pulls from the `tokenizer`) package, to split columns into tokens. We are interested in *words*, so that's the token we'll use:
+
+```{r tokenize}
+got_tokens <- got_dateframe %>% 
+  unnest_tokens(word, text_full)
+  
+
+# See how this differs from `ipcc_df`
+# Each word has its own row!
+```
+
+Let's count the words!
+```{r count-words}
+got_wc <- got_tokens %>% 
+  count(word) %>% 
+  arrange(-n)
+got_wc
+```
+
+OK...so we notice that a whole bunch of things show up frequently that we might not be interested in ("a", "the", "and", etc.). These are called *stop words*. Let's remove them. 
+
+### Remove stop words:
+
+See `?stop_words` and `View(stop_words)`to look at documentation for stop words lexicons.
+
+We will *remove* stop words using `tidyr::anti_join()`:
+```{r stopwords}
+got_stop <- got_tokens %>% 
+  anti_join(stop_words) %>% 
+  select(-got_text)
+```
+
+Now check the counts again: 
+```{r count-words2}
+got_swc <- got_stop %>% 
+  count(word) %>% 
+  arrange(-n)
+```
+
+What if we want to get rid of all the numbers (non-text) in `ipcc_stop`?
+```{r skip-numbers}
+# This code will filter out numbers by asking:
+# If you convert to as.numeric, is it NA (meaning those words)?
+# If it IS NA (is.na), then keep it (so all words are kept)
+# Anything that is converted to a number is removed
+
+got_no_numeric <- got_stop %>% 
+  filter(is.na(as.numeric(word)))
+```
+
+### A word cloud of IPCC report words (non-numeric)
+
+See more: https://cran.r-project.org/web/packages/ggwordcloud/vignettes/ggwordcloud.html
+
+```{r wordcloud-prep}
+# There are almost 2000 unique words 
+length(unique(got_no_numeric))
+
+# We probably don't want to include them all in a word cloud. Let's filter to only include the top 100 most frequent?
+got_top100 <- got_no_numeric %>% 
+  count(word) %>% 
+  arrange(-n) %>% 
+  head(100)
+got_top100
+```
+
+```{r wordcloud}
+got_cloud <- ggplot(data = got_top100, aes(label = word)) +
+  geom_text_wordcloud() +
+  theme_minimal()
+
+got_cloud
+```
+
+That's underwhelming. Let's customize it a bit:
+```{r wordcloud-pro}
+ggplot(data = got_top100, aes(label = word, size = n)) +
+  geom_text_wordcloud_area(aes(color = n), shape = "star") +
+  scale_size_area(max_size = 12) +
+  scale_color_gradientn(colors = c("darkgreen","blue","red")) +
+  theme_minimal()
+```
+
+Cool! And you can facet wrap (for different reports, for example) and update other aesthetics. See more here: https://cran.r-project.org/web/packages/ggwordcloud/vignettes/ggwordcloud.html
+
+### Sentiment analysis
+
+First, check out the ‘sentiments’ lexicon. From Julia Silge and David Robinson (https://www.tidytextmining.com/sentiment.html):
+
+“The three general-purpose lexicons are
+
+  -  AFINN from Finn Årup Nielsen,
+  -  bing from Bing Liu and collaborators, and
+  -  nrc from Saif Mohammad and Peter Turney
+
+All three of these lexicons are based on unigrams, i.e., single words. These lexicons contain many English words and the words are assigned scores for positive/negative sentiment, and also possibly emotions like joy, anger, sadness, and so forth. The AFINN lexicon assigns words with a score that runs between -5 and 5, with negative scores indicating negative sentiment and positive scores indicating positive sentiment.  The bing lexicon categorizes words in a binary fashion into positive and negative categories. The nrc lexicon categorizes words in a binary fashion (“yes”/“no”) into categories of positive, negative, anger, anticipation, disgust, fear, joy, sadness, surprise, and trust.  All of this information is tabulated in the sentiments dataset, and tidytext provides a function get_sentiments() to get specific sentiment lexicons without the columns that are not used in that lexicon."
+
+Let's explore the sentiment lexicons. "bing" is included, other lexicons ("afinn", "nrc", "loughran") you'll be prompted to download.
+
+**WARNING:** These collections include very offensive words. I urge you to not look at them in class.
+
+"afinn": Words ranked from -5 (very negative) to +5 (very positive)
+```{r afinn}
+get_sentiments(lexicon = "afinn")
+# You should be prompted to install lexicon - choose yes!
+
+
+# Let's look at the pretty positive words:
+afinn_pos <- get_sentiments("afinn") %>% 
+  filter(value %in% c(3,4,5))
+
+# Do not look at negative words in class. 
+afinn_pos
+```
+
+bing: binary, "positive" or "negative"
+```{r bing}
+get_sentiments(lexicon = "bing")
+# You should be prompted to install lexicon - choose yes!
+
+```
+
+nrc:https://saifmohammad.com/WebPages/NRC-Emotion-Lexicon.htm
+Includes bins for 8 emotions (anger, anticipation, disgust, fear, joy, sadness, surprise, trust) and positive / negative. 
+
+**Citation for NRC lexicon**: Crowdsourcing a Word-Emotion Association Lexicon, Saif Mohammad and Peter Turney, Computational Intelligence, 29 (3), 436-465, 2013.
+
+Now nrc:
+```{r nrc}
+get_sentiments(lexicon = "nrc")
+# You should be prompted to install lexicon - choose yes!
+
+```
+
+Let's do sentiment analysis on the IPCC text data using afinn, and nrc. 
+
+
+### Sentiment analysis with afinn: 
+
+First, bind words in `ipcc_stop` to `afinn` lexicon:
+```{r bind-afinn}
+got_afinn <- got_stop %>% 
+  inner_join(get_sentiments("afinn"))
+got_afinn
+```
+
+Let's find some counts (by sentiment ranking):
+```{r count-afinn}
+got_afinn_hist <- got_afinn %>% 
+  count(value)
+
+# Plot them: 
+ggplot(data = got_afinn_hist, aes(x = value, y = n)) +
+  geom_col(aes(fill = value)) +
+  theme_bw()
+```
+
+Investigate some of the words in a bit more depth:
+```{r afinn-2}
+# What are these '2' words?
+got_afinn2 <- got_afinn %>% 
+  filter(value == 2)
+```
+
+```{r afinn-2-more}
+# Check the unique 2-score words:
+unique(got_afinn2)
+
+# Count & plot them
+got_afinn2_n <- got_afinn2 %>% 
+  count(word, sort = TRUE) %>% 
+  mutate(word = fct_reorder(factor(word), n))
+
+
+ggplot(data = got_afinn2_n, aes(x = word, y = n)) +
+  geom_col() +
+  coord_flip() +
+  theme_bw()
+
+# OK so what's the deal with confidence? And is it really "positive" in the emotion sense? 
+```
+
+Look back at the IPCC report, and search for "confidence." Is it typically associated with emotion, or something else? 
+
+We learn something important from this example: Just using a sentiment lexicon to match words will not differentiate between different uses of the word...(ML can start figuring it out with context, but we won't do that here).
+
+Or we can summarize sentiment for the report: 
+```{r summarize-afinn}
+got_summary <- got_afinn %>% 
+  summarize(
+    mean_score = mean(value),
+    median_score = median(value)
+  )
+got_summary 
+```
+
+The mean and median indicate *slightly* positive overall sentiments based on the AFINN lexicon. 
+
+### NRC lexicon for sentiment analysis
+
+We can use the NRC lexicon to start "binning" text by the feelings they're typically associated with. As above, we'll use inner_join() to combine the IPCC non-stopword text with the nrc lexicon: 
+
+```{r bind-bing}
+got_nrc <- got_stop %>% 
+  inner_join(get_sentiments("nrc"))
+```
+
+Wait, won't that exclude some of the words in our text? YES! We should check which are excluded using `anti_join()`:
+
+```{r check-exclusions}
+got_exclude <- got_stop %>% 
+  anti_join(get_sentiments("nrc"))
+
+# View(ipcc_exclude)
+
+# Count to find the most excluded:
+got_exclude_n <- got_exclude %>% 
+  count(word, sort = TRUE)
+
+head(got_exclude_n)
+```
+
+**Lesson: always check which words are EXCLUDED in sentiment analysis using a pre-built lexicon! **
+
+Now find some counts: 
+```{r count-bing}
+got_nrc_n <- got_nrc %>% 
+  count(sentiment, sort = TRUE)
+
+# And plot them:
+
+ggplot(data = got_nrc_n, aes(x = sentiment, y = n)) +
+  geom_col(aes(fill = sentiment))+
+  theme_bw()
+```
+
+Or count by sentiment *and* word, then facet:
+```{r count-nrc}
+got_nrc_n5 <- got_nrc %>% 
+  count(word,sentiment, sort = TRUE) %>% 
+  group_by(sentiment) %>% 
+  top_n(5) %>% 
+  ungroup()
+
+got_nrc_gg <- ggplot(data = got_nrc_n5, aes(x = reorder(word,n), y = n, fill = sentiment)) +
+  geom_col(show.legend = FALSE) +
+  facet_wrap(~sentiment, ncol = 2, scales = "free") +
+  coord_flip() +
+  theme_minimal() +
+  labs(x = "Word", y = "count")
+
+# Show it
+got_nrc_gg
+
+# Save it
+ggsave(plot = got_nrc_gg, 
+       here("figures","got_nrc_sentiment.png"), 
+       height = 8, 
+       width = 5)
+
+```
+
+Wait, so "confidence" is showing up in NRC lexicon as "fear"? Let's check:
+```{r nrc-confidence}
+conf <- get_sentiments(lexicon = "nrc") %>% 
+  filter(word == "confidence")
+
+# Yep, check it out:
+conf
+```
+
+## Big picture takeaway
+
+There are serious limitations of sentiment analysis using existing lexicons, and you should **think really hard** about your findings and if a lexicon makes sense for your study. Otherwise, word counts and exploration alone can be useful! 
+
+## Your task
+
+Taking this script as a point of departure, apply sentiment analysis on the Game of Thrones. You will find a pdf in the data folder. What are the most common meaningful words and what emotions do you expect will dominate this volume? Are there any terms that are similarly ambiguous to the 'confidence' above? 
+
+### Credits: 
+This tutorial is inspired by Allison Horst's Advanced Statistics and Data Analysis.
